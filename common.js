@@ -171,7 +171,7 @@ const readPassword = (isDebug = false) => {
     }
 }
 
-const minimumPatternStringLength = 5
+const minimumPatternStringLength = 3
 
 const parsePatterns = (argv) => {
     const inputPatterns = argv.pattern

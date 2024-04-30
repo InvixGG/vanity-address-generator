@@ -76,21 +76,8 @@ const parseArgv = (args) => {
             describe: `(for debugging purpose only) allow default encryption password 123456 from file ${cm.passwordFileName}`,
         })
         .version()
-        .option('donate', {
-            describe: 'My ERC wallet 0xfcA11210CC837F37b354d4A3b716316375499999 aka taoist-world.eth (via BSC to lower gas fee)'
-        })
         .help('help')
         .argv
-}
-
-const printDonate = () => {
-    if (cluster.isPrimary) {
-        console.log('========================')
-        console.log('If you like my work, donate me a coffee too 0xfcA11210CC837F37b354d4A3b716316375499999 (ENS: taoist-world.eth)')
-        console.log(' (should send via BSC to lower gas fee)')
-        console.log('I appreciate your love for my wasted working hours')
-        console.log('========================')
-    }
 }
 
 /**
@@ -412,9 +399,6 @@ const main = function() {
                 }
             }, 20000)
         }
-
-        printDonate()
-
     } else {
         let lastReportChild = startMs // first report is 5s after started
         const childEnv = process.env
