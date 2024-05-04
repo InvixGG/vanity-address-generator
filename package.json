@@ -1,37 +1,21 @@
 {
-  "name": "vanity-address-generator",
+  "name": "chiefplug-address-generator",
   "version": "1.0.0",
   "description": "ChiefPlug: Create billions ERC20 addresses, find vanity wallet addresses you want or any wallet address can deploy a vanity ERC20 contract address at given nonce",
   "main": "index.js",
   "bin": {
-    "vanity": "index.js"
+    "chiefplug-generator": "index.js"
   },
-  "keywords": [
-    "eth",
-    "erc20",
-    "ethereum",
-    "vanity",
-    "contract",
-    "wallet",
-    "address",
-    "checksum",
-    "ethereum-contract",
-    "blockchain",
-    "generator",
-    "vanity-eth",
-    "vanity-contract",
-    "vanity-generator"
-  ],
   "author": "Vexel Studios",
   "dependencies": {
-    "ethereumjs-util": "^7.1.4",
+    "ethereumjs-util": "^7.1.5",
     "ethereumjs-wallet": "^1.0.2",
-    "keccak": "^3.0.1",
+    "keccak": "^3.0.4",
     "process": "^0.11.10",
-    "randombytes": "^2.0.6",
+    "randombytes": "^2.1.0",
     "rlp": "^3.0.0",
-    "secp256k1": "^3.8.0",
+    "secp256k1": "^5.0.0",
     "web3": "^1.7.0",
-    "yargs": "^17.3.1"
+    "yargs": "^17.7.2"
   }
 }
