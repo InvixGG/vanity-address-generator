@@ -1,19 +1,17 @@
-const { generateContinuousText } = require("./addressUtils");
+import {generateContinuousText} from "./addressUtils";
+import Pattern from "../Models/Pattern";
 
 const minimumLengthToCheckVanityScore = 3;
 const maximumLengthToCheckVanityScore = 19;
-const continuous = [];
+const continuous: Array<Array<number | Pattern>> = [];
 const minimumWow = minimumLengthToCheckVanityScore * 2 + 2;
 
 /**
- * Give vanity score for an address.
+ * Give vanity score for a pattern.
  * @param {string} pattern - Pattern to check - string of characters.
  * @returns {number} Vanity score - number of characters in the pattern.
  */
-const giveBaseVanityScoreToPattern = (pattern) => {
-    if (typeof pattern !== 'string')
-        throw `Pattern must be string`;
-
+function giveBaseVanityScoreToPattern(pattern: string): number {
     const patternLen = pattern.length;
     if (patternLen < 3) {
         return 0;
@@ -30,26 +28,25 @@ const giveBaseVanityScoreToPattern = (pattern) => {
     }
 
     return vscore;
-};
+}
 
 /**
  * Injects base vanity score to an array of patterns.
- * @param {Array} arr - Array of patterns - array of objects with p (pattern) and s (score) properties.
+ * @param {Pattern[]} arr - Array of patterns.
  */
-const injectBaseVanityScore = (arr) => {
-    for (const idx in arr) {
-        const pattern = arr[idx];
-        arr[idx] = {
-            p: pattern,
-            s: giveBaseVanityScoreToPattern(pattern),
-        };
+function injectBaseVanityScore(arr: Pattern[]): Pattern[] {
+    const result: Pattern[] = [];
+    for (const patternObj of arr) {
+        const pattern = patternObj.pattern;
+        result.push(new Pattern(pattern, giveBaseVanityScoreToPattern(pattern)));
     }
-};
+    return result;
+}
 
 /**
  * Initializes vanity score table.
  */
-const initVanityScoreTable = () => {
+function initVanityScoreTable(): void {
     for (let c = 0; c <= 9; c++) {
         const cL = [];
         for (let i = 0; i < minimumLengthToCheckVanityScore; i++) {
@@ -58,74 +55,68 @@ const initVanityScoreTable = () => {
 
         for (let l = minimumLengthToCheckVanityScore; l <= maximumLengthToCheckVanityScore; l++) {
             const pattern = generateContinuousText(c.toString(), l);
-            cL.push({
-                p: pattern,
-                s: giveBaseVanityScoreToPattern(pattern),
-            });
+            cL.push(new Pattern(pattern, giveBaseVanityScoreToPattern(pattern)));
         }
 
         continuous.push(cL);
     }
 
     const alphabet = ['a', 'b', 'c', 'd', 'e', 'f'];
-    for (const idx in alphabet) {
+    for (const letter of alphabet) {
         const cL = [];
         for (let i = 0; i < minimumLengthToCheckVanityScore; i++) {
             cL.push(i);
         }
 
         for (let l = minimumLengthToCheckVanityScore; l <= maximumLengthToCheckVanityScore; l++) {
-            const pattern = generateContinuousText(alphabet[idx], l);
-            cL.push({
-                p: pattern,
-                s: giveBaseVanityScoreToPattern(pattern),
-            });
+            const pattern = generateContinuousText(letter, l);
+            cL.push(new Pattern(pattern, giveBaseVanityScoreToPattern(pattern)));
         }
 
         continuous.push(cL);
     }
-};
+}
 
 /**
  * Rates address.
  * @param {string} address - Address to rate.
  * @returns {number} Vanity score - number of characters in the pattern.
  */
-const rateAddress = (address) => {
+function rateAddress(address: string): number {
     return _rateAddress(address, true) + _rateAddress(address, false);
-};
+}
 
 /**
- * Rates address
+ * Rates address.
  * @param {string} address - Address to rate.
  * @param {boolean} prefix - Whether to check prefix or suffix.
  * @returns {number} Vanity score - number of characters in the pattern.
  */
-const _rateAddress = (address, prefix) => {
+function _rateAddress(address: string, prefix: boolean): number {
     let highestVanityScore = 0;
 
-    for (let c = 15 /* 9 -> 0 */ /* a -> f */; c >= 0; c--) {
+    for (let c = 15; c >= 0; c--) {
         if (prefix) {
-            if (!address.startsWith(continuous[c][minimumLengthToCheckVanityScore].p)) {
+            if (!address.startsWith((continuous[c][minimumLengthToCheckVanityScore] as Pattern).pattern)) {
                 continue;
             }
         } else {
-            if (!address.endsWith(continuous[c][minimumLengthToCheckVanityScore].p)) {
+            if (!address.endsWith((continuous[c][minimumLengthToCheckVanityScore] as Pattern).pattern)) {
                 continue;
             }
         }
 
-        highestVanityScore = continuous[c][minimumLengthToCheckVanityScore].s;
+        highestVanityScore = (continuous[c][minimumLengthToCheckVanityScore] as Pattern).score;
         for (let l = minimumLengthToCheckVanityScore + 1; l <= maximumLengthToCheckVanityScore; l++) {
             if (prefix) {
-                if (address.startsWith(continuous[c][l].p)) {
-                    highestVanityScore = continuous[c][l].s;
+                if (address.startsWith((continuous[c][l] as Pattern).pattern)) {
+                    highestVanityScore = (continuous[c][l] as Pattern).score;
                 } else {
                     return highestVanityScore;
                 }
             } else {
-                if (address.endsWith(continuous[c][l].p)) {
-                    highestVanityScore = continuous[c][l].s;
+                if (address.endsWith((continuous[c][l] as Pattern).pattern)) {
+                    highestVanityScore = (continuous[c][l] as Pattern).score;
                 } else {
                     return highestVanityScore;
                 }
@@ -137,7 +128,7 @@ const _rateAddress = (address, prefix) => {
 }
 
 /**
- * Rates address of an address.
+ * Rates address.
  * @param {string} address - Address to rate.
  * @param {boolean} startsWith - Whether to check prefix or suffix.
  * @param {boolean} endsWith - Whether to check prefix or suffix.
@@ -146,19 +137,21 @@ const _rateAddress = (address, prefix) => {
  * @param {string} patternMatched - Pattern matched.
  * @returns {number} Vanity score - number of characters in the pattern.
  */
-const rateVanityScoreOfAddress = (address, startsWith, endsWith, vscore, extraAddress, patternMatched) => {
+function rateVanityScoreOfAddress(address: string, startsWith: boolean, endsWith: boolean, vscore: number, extraAddress?: string, patternMatched?: string): number {
     let vanityScore = (startsWith ? vscore : 0) + (endsWith ? vscore : 0);
     vanityScore += rateAddress(address);
 
     if (extraAddress) {
-        vanityScore += (extraAddress.startsWith(patternMatched) ? vscore : 0) + (extraAddress.endsWith(patternMatched) ? vscore : 0);
+        if (typeof patternMatched === "string") {
+            vanityScore += (extraAddress.startsWith(patternMatched) ? vscore : 0) + (extraAddress.endsWith(patternMatched) ? vscore : 0);
+        }
         vanityScore += rateAddress(extraAddress);
     }
 
     return vanityScore;
-};
+}
 
-module.exports = {
+export {
     giveBaseVanityScoreToPattern,
     injectBaseVanityScore,
     initVanityScoreTable,

@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 const passwordFileName = 'chiefplug-encryption-password.txt';
 
@@ -7,24 +7,24 @@ const passwordFileName = 'chiefplug-encryption-password.txt';
  * @param {string} logFile - File to append content to.
  * @param {string} logContent - Content to append.
  */
-const appendFile = (logFile, logContent) => {
+function appendFile(logFile: string, logContent: string): void {
     try {
-        fs.writeFileSync(logFile, '\n' + logContent, { flag: 'a+' });
+        fs.writeFileSync(logFile, '\n' + logContent, {flag: 'a+'});
     } catch (err) {
         console.error(err);
         console.error(`ERR: Failed to append content: '${logContent}'`);
         console.error(` into file '${logFile}'`);
     }
-};
+}
 
 /**
  * Reads password from a file.
  * @returns {string | undefined} Password - Password read from a file.
  */
-const readPassword = () => {
+function readPassword(): string | undefined {
     if (!fs.existsSync(passwordFileName)) {
         try {
-            fs.writeFileSync(passwordFileName, '123456', { flag: 'a+' });
+            fs.writeFileSync(passwordFileName, '123456', {flag: 'a+'});
         } catch (err) {
             console.error(err);
             console.error(`ERR: Unable to create default ${passwordFileName} file`);
@@ -41,26 +41,21 @@ const readPassword = () => {
         const minimumPasswordLength = 6;
         if (password.length < minimumPasswordLength) {
             console.error(`ERR: Password is too short, require minimum ${minimumPasswordLength} characters in length`);
-            return
+            return;
         }
 
         return password;
     }
-};
+}
 
 /**
  * Creates a directory.
  * @param {string} dir - Directory to create.
  */
-const createDir = (dir) => {
+function createDir(dir: string): void {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
-};
+}
 
-module.exports = {
-    passwordFileName,
-    appendFile,
-    readPassword,
-    createDir,
-};
+export {passwordFileName, appendFile, readPassword, createDir};
