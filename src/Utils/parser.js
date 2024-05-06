@@ -1,11 +1,8 @@
 const yargs = require('yargs/yargs');
-const os = require("os");
 const cluster = require("cluster");
 const {passwordFileName} = require("./fileUtils");
 
 const minimumPatternStringLength = 3
-const numCPUs = os.cpus().length
-const suggestedProcessesCount = Math.max(1, numCPUs - 1)
 
 /**
  * Parses arguments from command line.
@@ -63,12 +60,6 @@ const parseArgv = (args) => {
             alias: 's',
             describe: 'do not write private key to log file (output-?.txt files)',
             requiresArg: false,
-        })
-        .option('cpu', {
-            alias: 'x',
-            describe: 'to specify number of children processes (maximum equals to number of CPUs), default = number of CPUs - 1. Machines with above 10 cores, to achieve max performance, should launch multiple processes with single core each (-x=1)',
-            requiresArg: true,
-            number: true,
         })
         .option('exit', {
             alias: 'e',
@@ -163,37 +154,6 @@ const parseNonce = (argv) => {
 };
 
 /**
- * Parses number of child processes from command line arguments.
- * @param {Object} argv - Command line arguments object.
- */
-const parseChildrenProcessesCount = (argv) => {
-    const count = argv.cpu
-
-    if (count === undefined) {
-        return {
-            count: suggestedProcessesCount,
-            max: false,
-            single: suggestedProcessesCount === 1,
-        };
-    }
-
-    if (count < 1 || count > numCPUs) {
-        console.error(`ERR: Flag --threads must be a number between 1 and ${numCPUs}`);
-        return;
-    }
-
-    if (count > suggestedProcessesCount) {
-        console.log(`NOTICE: It is recommended to use less than ${numCPUs} children processes on your machine to prevent machine freeze issue`);
-    }
-
-    return {
-        count: count,
-        max: count >= numCPUs,
-        single: count === 1,
-    };
-};
-
-/**
  * Parses exit flag from command line arguments.
  * @param {Object} argv - Command line arguments object.
  */
@@ -216,6 +176,5 @@ module.exports = {
     parseArgv,
     parsePatterns,
     parseNonce,
-    parseChildrenProcessesCount,
     parseExit,
 };
