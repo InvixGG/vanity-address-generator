@@ -38,12 +38,12 @@ const main = function() {
     }
 
     const contractMode = argv.contract !== undefined;
-    const addressMode = argv.address !== undefined;
+    const walletMode = argv.wallet !== undefined;
 
-    if (!contractMode && !addressMode) {
+    if (!contractMode && !walletMode) {
         console.error('ERR: You must specify either flag `--contract` or `--address`');
         return;
-    } else if (contractMode && addressMode) {
+    } else if (contractMode && walletMode) {
         console.error('ERR: You can only specify one of too flag `--contract` or `--address`');
         return;
     }
@@ -117,21 +117,12 @@ const main = function() {
         return;
     }
 
-    const doNotSavePrivateKeyToLog = argv.noPrivateKey === true;
-
     initVanityScoreTable();
-
-    if (cluster.isPrimary) {
-        if (doNotSavePrivateKeyToLog) {
-            console.log('You have selected to not to save raw private key into log file');
-        }
-    }
 
     cfg.contractMode = contractMode;
     cfg.nonce = nonce;
     cfg.patterns = patterns;
     cfg.password = password;
-    cfg.doNotSavePrivateKeyToLog = doNotSavePrivateKeyToLog;
     cfg.baseDir = baseDir;
     cfg.defaultWowVSFilePrefix = defaultWowVSFilePrefix;
     cfg.defaultWalletDir = defaultWalletDir;

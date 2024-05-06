@@ -11,31 +11,15 @@ const minimumPatternStringLength = 3
  */
 const parseArgv = (args) => {
     return yargs(args)
-        .usage('Create billion ERC20 addresses, check if any of them can produce vanity ERC20 contract addresses at given nonce or get you thousands vanity ERC20 addresses, depends on what you want')
-        .example(
-            "$0 --contract --pattern 88888 99999 --nonce 2 --noPrivateKey",
-            "Find wallets can produce vanity ERC20 contract addr starts or ends with 88888 or 99999 at nonce 2"
-        )
-        .example(
-            "$0 --address --pattern 88888 99999 --noPrivateKey",
-            "Find wallets with addr starts or ends with 88888 or 99999"
-        )
-        .example(
-            "$0 -c -p c0ffee b00b5 -n 6 -s",
-            "Find wallets can produce vanity ERC20 contract addr starts or ends with c0ffee or b00b5 at nonce 6"
-        )
-        .example(
-            "$0 -a -p c0ffee b00b5 -s",
-            "Find wallets with addr starts or ends with c0ffee or b00b5"
-        )
+        .usage('Create billions of ERC20 addresses, check if any of them can produce vanity ERC20 contract addresses at given nonce or get you thousands vanity ERC20 addresses, depends on what you want')
         .option('contract', {
             alias: 'c',
             describe: 'Generate contract mode',
             requiresArg: false,
         })
-        .option('address', {
-            alias: 'a',
-            describe: 'Generate address mode',
+        .option('wallet', {
+            alias: 'w',
+            describe: 'Generate wallet mode',
             requiresArg: false,
         })
         .option('pattern', {
@@ -54,11 +38,6 @@ const parseArgv = (args) => {
         .option('allowNonce0', {
             alias: 'z',
             describe: '(for contract mode only) Allow value of flag `--nonce` can be set to 0',
-            requiresArg: false,
-        })
-        .option('noPrivateKey', {
-            alias: 's',
-            describe: 'do not write private key to log file (output-?.txt files)',
             requiresArg: false,
         })
         .option('exit', {

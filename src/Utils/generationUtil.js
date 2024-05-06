@@ -33,11 +33,7 @@ const generateNewWalletAndGetVanityScore = (cfg) => {
                 const priv = randbytes.toString('hex');
                 console.log(`VS=${sVanityScore}.....C=${contractAddress} <= ${address}`);
 
-                if (cfg.doNotSavePrivateKeyToLog) {
-                    appendFile(cfg.logFile, `VanityScore=${sVanityScore}\tNonce=${cfg.nonce}\tContractAddr=0x${contractAddress}\tWalletAddr=0x${address}\tPRIVATE_KEY_IS_NOT_SAVED_INTO_LOG`);
-                } else {
-                    appendFile(cfg.logFile, `VanityScore=${sVanityScore}\tNonce=${cfg.nonce}\tContractAddr=0x${contractAddress}\tWalletAddr=0x${address}\tPrivateKey=${priv}`);
-                }
+                appendFile(cfg.logFile, `VanityScore=${sVanityScore}\tNonce=${cfg.nonce}\tContractAddr=0x${contractAddress}\tWalletAddr=0x${address}\tPrivateKey=${priv}`);
 
                 const jsonWalletContent = fromPrivateKeyToV3KeyStore(priv, cfg.password);
                 appendFile(`${cfg.defaultWalletDir}/vscore=${sVanityScore}_contract=${contractAddress}_wallet=${address}_nonce=${cfg.nonce}.json`, JSON.stringify(jsonWalletContent));
@@ -63,12 +59,8 @@ const generateNewWalletAndGetVanityScore = (cfg) => {
 
                 const priv = randbytes.toString('hex');
                 console.log(`VS=${sVanityScore}.....A=0x${address}`);
-                
-                if (cfg.doNotSavePrivateKeyToLog) {
-                    appendFile(cfg.logFile, `VanityScore=${sVanityScore}\tWalletAddr=0x${address}\tPRIVATE_KEY_IS_NOT_SAVED_INTO_LOG`);
-                } else {
-                    appendFile(cfg.logFile, `VanityScore=${sVanityScore}\tWalletAddr=0x${address}\tPrivateKey=${priv}`);
-                }
+
+                appendFile(cfg.logFile, `VanityScore=${sVanityScore}\tWalletAddr=0x${address}\tPrivateKey=${priv}`);
 
                 const jsonWalletContent = fromPrivateKeyToV3KeyStore(priv, cfg.password);
                 appendFile(`${cfg.defaultWalletDir}/vscore=${sVanityScore}_wallet=${address}.json`, JSON.stringify(jsonWalletContent));
