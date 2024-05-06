@@ -50,10 +50,6 @@ const readPassword = (isDebug = false) => {
             return
         }
 
-        if (cluster.isPrimary) {
-            console.log(`WARNING: remember to wipe content of ${passwordFileName} file after you done. It's dangerous to leave your secure password there`);
-        }
-
         return password;
     }
 };

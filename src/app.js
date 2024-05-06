@@ -119,19 +119,12 @@ const main = function() {
 
     const doNotSavePrivateKeyToLog = argv.noPrivateKey === true;
 
-    if (cluster.isPrimary) {
-        console.log(`Generated ERC20 addresses will be written into file '${baseDir}${defaultLogFilePrefix}-?.txt' and json wallet files will be written into '${defaultWalletDir}' directory`);
-    }
-
     initVanityScoreTable();
 
     if (cluster.isPrimary) {
         if (doNotSavePrivateKeyToLog) {
             console.log('You have selected to not to save raw private key into log file');
-        } else {
-            console.log('WARNING: This app will save private key of generated addresses into log file, to disable this feature, use --noPrivateKey option');
         }
-        console.log('WARNING: You HAVE TO test every generated wallets before using them to prevent un-expected loss. Firstly test import using json wallet file, secondly test transfer funds on Test Nets');
     }
 
     cfg.contractMode = contractMode;
@@ -210,7 +203,6 @@ const main = function() {
         injectBaseVanityScore(patterns);
 
         if (childEnv.childrenCount === pidChild) {
-            console.log(`NOTICE: It's safe to remove the password file at this point`);
             if (process.platform !== "win32") {
                 console.log(` TIPS: Recommended way to remove a file with sensitive data is running command: rm -P <file_name>`);
                 console.log(`  since it will rewrite content of file with some pseudo content before permanent delete it`);
