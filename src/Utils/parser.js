@@ -1,6 +1,5 @@
 const yargs = require('yargs/yargs');
 const cluster = require("cluster");
-const {passwordFileName} = require("./fileUtils");
 
 const minimumPatternStringLength = 3
 
@@ -31,14 +30,9 @@ const parseArgv = (args) => {
         })
         .option('nonce', {
             alias: 'n',
-            describe: '(for contract mode only) it is nonce you expect. Minimum value is 1 because you must test your wallet by making at least one payout transaction before using to prevent unexpected loss. Can set to 0 if flag `--allowNonce0` also provided',
+            describe: '(for contract mode only) it is nonce you expect. Minimum value is 1 because you must test your wallet by making at least one payout transaction before using to prevent unexpected loss.',
             requiresArg: true,
             number: true,
-        })
-        .option('allowNonce0', {
-            alias: 'z',
-            describe: '(for contract mode only) Allow value of flag `--nonce` can be set to 0',
-            requiresArg: false,
         })
         .option('exit', {
             alias: 'e',
