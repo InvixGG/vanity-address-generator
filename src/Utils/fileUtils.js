@@ -20,10 +20,9 @@ const appendFile = (logFile, logContent) => {
 
 /**
  * Reads password from a file.
- * @param {boolean} isDebug - Whether to return debug password or not.
  * @returns {string | undefined} Password - Password read from a file.
  */
-const readPassword = (isDebug = false) => {
+const readPassword = () => {
     if (!fs.existsSync(passwordFileName)) {
         try {
             fs.writeFileSync(passwordFileName, '123456', { flag: 'a+' });
@@ -37,10 +36,6 @@ const readPassword = (isDebug = false) => {
 
     const password = fs.readFileSync(passwordFileName, 'utf8').toString().trim();
     if (password === '123456') {
-        if (isDebug === true) {
-            return password;
-        }
-
         console.error(`ERR: You have to open ${passwordFileName} file and replace the default password 123456 with yours strongly secured password. This password will be used to create json wallet files (V3 keystore)`);
         return;
     } else {

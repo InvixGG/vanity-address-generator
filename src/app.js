@@ -41,18 +41,16 @@ const main = function() {
     const walletMode = argv.wallet !== undefined;
 
     if (!contractMode && !walletMode) {
-        console.error('ERR: You must specify either flag `--contract` or `--address`');
+        console.error('ERR: You must specify either flag `--contract` or `--wallet`');
         return;
     } else if (contractMode && walletMode) {
-        console.error('ERR: You can only specify one of too flag `--contract` or `--address`');
+        console.error('ERR: You can only specify one of too flag `--contract` or `--wallet`');
         return;
     }
 
     const defaultWalletDir = contractMode ? contractWalletsDir : addrWalletsDir;
     const defaultLogFilePrefix = contractMode ? 'output-contract' : 'output-addr';
     const defaultWowVSFilePrefix = contractMode ? 'vscore-contract' : 'vscore-addr';
-
-    const isDebug = argv.debug === true;
 
     const nonce = contractMode ? parseNonce(argv) : undefined;
     if (contractMode) {
@@ -112,7 +110,7 @@ const main = function() {
         }
     }
 
-    const password = readPassword(isDebug);
+    const password = readPassword();
     if (!password) {
         return;
     }

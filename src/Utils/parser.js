@@ -46,10 +46,6 @@ const parseArgv = (args) => {
             requiresArg: false,
             number: true,
         })
-        .option('debug', {
-            alias: 'd',
-            describe: `(for debugging purpose only) allow default encryption password 123456 from file ${passwordFileName}`,
-        })
         .version()
         .help('help')
         .argv;
