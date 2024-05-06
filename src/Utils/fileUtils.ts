@@ -1,5 +1,4 @@
 const fs = require('fs');
-const cluster = require("cluster");
 
 const passwordFileName = 'chiefplug-encryption-password.txt';
 

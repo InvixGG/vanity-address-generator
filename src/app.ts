@@ -1,8 +1,6 @@
-const randomBytes = require('randombytes')
-const { privateToAddress } = require('ethereumjs-util')
 const cluster = require('cluster')
 const process = require('process')
-const { parseArgv, parseNonce, parsePatterns, parseChildrenProcessesCount, parseExit } = require("./Utils/parser");
+const { parseArgv, parseNonce, parsePatterns, parseExit } = require("./Utils/parser");
 const { createDir, readPassword, appendFile } = require("./Utils/fileUtils");
 const { initVanityScoreTable, injectBaseVanityScore } = require("./Utils/vanityScoreCalculator");
 const { generateNewWalletAndGetVanityScore } = require("./Utils/generationUtil");
@@ -58,17 +56,10 @@ async function main(): Promise<void> {
             return;
         }
 
-        if (argv.allowNonce0 === true) {
-            if (nonce < 0) {
-                console.error('ERR: Value of flag --nonce must be >= 0');
-                return;
-            }
-        } else {
-            if (nonce < 1) {
-                console.error('ERR: Value of flag --nonce must be >= 1');
-                console.error(' Minimum nonce is 1 because you must test every generated wallets before use (so nonce 0 will be used for the very first transaction)');
-                return;
-            }
+        if (nonce < 1) {
+            console.error('ERR: Value of flag --nonce must be >= 1');
+            console.error(' Minimum nonce is 1 because you must test every generated wallets before use (so nonce 0 will be used for the very first transaction)');
+            return;
         }
 
         if (cluster.default.isPrimary && nonce > 10) {
