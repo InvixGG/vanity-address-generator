@@ -112,7 +112,6 @@ const parsePatterns = (argv) => {
                 console.error(`ERR: Invalid pattern '${pattern}', only accept combination of 0-9 a-f (hex)`);
                 return;
             }
-            console.log(`Pattern '${pattern}' difficulty = ${Math.pow(16, pattern.length)}`);
         }
     } else {
         for (const idx in patterns) {
