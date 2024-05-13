@@ -12,8 +12,8 @@ const os = require("os");
 /**
  * Main function of the app.
  */
-const main = function() {
-    const argv = parseArgv(process.argv.slice(2));
+async function main(): Promise<void> {
+    const argv = await parseArgv(process.argv.slice(2));
 
     const baseDir = 'chiefplug-generator/';
     const baseWalletsDir = `${baseDir}wallets/`;
@@ -71,19 +71,18 @@ const main = function() {
             }
         }
 
-        if (cluster.isPrimary && nonce > 10) {
+        if (cluster.default.isPrimary && nonce > 10) {
             console.log(`WARNING: Selected nonce ${nonce} is too high. Nonce is number of transaction an address have sent before. This app generates new addresses so if nonce is too high which means you have to make a lot transactions to fill the gap`);
         }
     }
 
     const patterns = parsePatterns(argv);
-
     if (!patterns) {
         return;
     }
 
-    if (contractMode) {
-        if (cluster.isPrimary) {
+    if (cluster.default.isPrimary) {
+        if (contractMode && nonce !== undefined) {
             if (patterns.length === 1) {
                 console.log(`Searching for ERC20 addresses which can create contract with prefix or suffix '${patterns[0]}' at nonce ${nonce} (0x${nonce.toString(16)})`);
             } else {
@@ -91,9 +90,7 @@ const main = function() {
                 console.log(`[${patterns.join(', ')}]`);
                 console.log(`at nonce ${nonce} (0x${nonce.toString(16)})`);
             }
-        }
-    } else {
-        if (cluster.isPrimary) {
+        } else {
             if (patterns.length === 1) {
                 console.log(`Searching for ERC20 addresses with prefix or suffix '${patterns[0]}'`);
             } else {
@@ -104,7 +101,7 @@ const main = function() {
     }
 
     const numCPUs = Math.max(1, os.cpus().length - 1);
-    if (cluster.isPrimary) {
+    if (cluster.default.isPrimary) {
         if (!numCPUs) {
             return;
         }
@@ -117,13 +114,7 @@ const main = function() {
 
     initVanityScoreTable();
 
-    cfg.contractMode = contractMode;
-    cfg.nonce = nonce;
-    cfg.patterns = patterns;
-    cfg.password = password;
-    cfg.baseDir = baseDir;
-    cfg.defaultWowVSFilePrefix = defaultWowVSFilePrefix;
-    cfg.defaultWalletDir = defaultWalletDir;
+    const config = new Config(contractMode, nonce, patterns, password, baseDir, defaultWowVSFilePrefix, defaultWalletDir, '');
 
     let highestVanityScore = 0;
 
@@ -131,11 +122,11 @@ const main = function() {
 
     const inputExit = parseExit(argv);
     const exitAtMs = inputExit === undefined ? undefined : startMs + inputExit * 60 * 1000;
-    if (exitAtMs && cluster.isPrimary) {
+    if (exitAtMs && cluster.default.isPrimary) {
         console.log(`Application will exits after ${inputExit} minutes`);
     }
-    if (cluster.isPrimary) {
-        const cache = [];
+    if (cluster.default.isPrimary) {
+        const cache: { generated: number; found: number; }[] = [];
         console.log(`Launching ${numCPUs} children processes`);
 
         for (let i = 0; i < numCPUs; i++) {
@@ -144,22 +135,22 @@ const main = function() {
                 found: 0,
             };
             cache.push(cacheData);
-            const proc = cluster.fork({
+            const proc = cluster.default.fork({
                 pidChild: i + 1,
                 childrenCount: numCPUs
             });
-            proc.on('message', function(msg) {
+            proc.on('message', function (msg: any) {
                 if (msg.pidChild) {
-                    cacheData.generated = msg.generated
-                    cacheData.found = msg.found
-                    highestVanityScore = Math.max(highestVanityScore, msg.highestVanityScore)
+                    cacheData.generated = msg.generated;
+                    cacheData.found = msg.found;
+                    highestVanityScore = Math.max(highestVanityScore, msg.highestVanityScore);
                 }
             });
         }
 
-        const interval = setInterval(function() {
-            const nowMs = getNowMs()
-            const timePassed = Math.floor((nowMs - startMs) / 1000)
+        const interval = setInterval(function () {
+            const nowMs = getNowMs();
+            const timePassed = Math.floor((nowMs - startMs) / 1000);
 
             let sumGenerated = 0;
             let sumFound = 0;
@@ -178,9 +169,9 @@ const main = function() {
     } else {
         let lastReportChild = startMs; // first report is 5s after started
         const childEnv = process.env;
-        const pidChild = childEnv.pidChild;
-        const selfReport = childEnv.report === true || childEnv.report === 'true';
-        const reportIntervalChild = selfReport ? 20000: 10000;
+        const pidChild = parseInt(childEnv.pidChild as string);
+        const selfReport = childEnv.report === 'true';
+        const reportIntervalChild = selfReport ? 20000 : 10000;
         const logFileChild = `${baseDir}${defaultLogFilePrefix}-${pidChild}.txt`;
         let generatedOnChild = 0; // total number of addresses generated by this process
         let foundOnChild = 0; // total number of addresses generated by this process and match requirement
@@ -191,17 +182,17 @@ const main = function() {
 
         injectBaseVanityScore(patterns);
 
-        if (childEnv.childrenCount === pidChild) {
+        if (childEnv.childrenCount === pidChild.toString()) {
             if (process.platform !== "win32") {
                 console.log(` TIPS: Recommended way to remove a file with sensitive data is running command: rm -P <file_name>`);
                 console.log(`  since it will rewrite content of file with some pseudo content before permanent delete it`);
             }
         }
 
-        cfg.logFile = logFileChild;
+        config.logFile = logFileChild;
 
-        for (;;) {
-            const score = generateNewWalletAndGetVanityScore(cfg);
+        for (; ;) {
+            const score = generateNewWalletAndGetVanityScore(config);
             generatedOnChild++;
 
             if (score > 0) {
@@ -226,11 +217,11 @@ const main = function() {
                 if (selfReport) {
                     console.log(`(Child ${pidChild}) avg ${(foundOnChild / timePassed).toFixed(3)} found addr/s from ${Math.floor(generatedOnChild / timePassed)} created addr/s`);
                 } else {
-                    process.send({
-                        pidChild: pidChild,
+                    process.send?.({
+                        pidChild,
                         generated: generatedOnChild,
                         found: foundOnChild,
-                        highestVanityScore: highestVanityScore,
+                        highestVanityScore,
                     });
                 }
 
@@ -243,8 +234,4 @@ const main = function() {
     }
 }
 
-const cfg = {
-
-};
-
-module.exports = main;
+export default main;
